@@ -27,9 +27,11 @@
 # 2. download the firefox plugin 'cliget'
 # 3. go to some file on the TCD- TIMIT downloads page, right click, and 'copy curl for link' in the cliget menu
 # 4. get the 'Cookie' header, and replace the link in this script with it
-cookieHeader='Cookie: has_js=1; SSESSa08f1a9d41786c65667603b759c65eb0=Kfnjpyh3YTufGYIBWcHhIQAVVFhQIR1JrVqa-_a_sp8'
+# 5. then run in terminal: bash getTCD-TIMIT.sh downloadLocation
+cookieHeader='Cookie: has_js=1; SSESSa08f1a9d41786c65667603b759c65eb0=hsTIknn8-Ixlh0ZlZv-YV0EKaI0Lw3SIAOmUv4SuH8Q'
 
-topDir="$PWD"
+topDir="$1"
+cd $topDir
 echo "Downloading the TCD- TIMIT database to $topDir"
 echo "############################################################################"
 
@@ -47,7 +49,7 @@ mkdir -p lipspeakers
 mkdir -p volunteers
 
 
-IFS=' ' read -ra line <<< `cat $1`  
+IFS=' ' read -ra line <<< `cat downloadLocations.txt`
 
 for i in "${line[@]}"; do
 	if [[ $i =~ .*https* ]]; then  # for the URL, you should be cd'ed into the right place. Now download the file.
