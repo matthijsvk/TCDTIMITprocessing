@@ -4,7 +4,7 @@ This file explains how to use these scripts in order to process the TCDTIMIT dat
 First of all, I want to thank the people at the Sigmedia department of the Trinity College Dublin for creating this database.
 Harte, N.; Gillen, E., "TCD-TIMIT: An Audio-Visual Corpus of Continuous Speech," Multimedia, IEEE Transactions on , vol.17, no.5, pp.603,615, May 2015 doi: 10.1109/TMM.2015.2407694
 
-The goal of this repository is to provide scripts to extract from mp4 videos and mlf phoneme label files the video frames that correspond to the phonemes in the label file.
+The goal is to extract from mp4 videos and mlf phoneme label files the video frames that correspond to the phonemes in the label file.
 
 What you'll need:  
 - an account on https://sigmedia.tcd.ie/TCDTIMIT/ in order to be able to download the database
@@ -34,13 +34,12 @@ The most important folders and files are:
       - it works in several steps:    
            1. preprocess the MLF file: extract video paths, phonemes and their times, and the corresponding frames in the video.    
            1. extract all frames from the video, cropping the video to some box roughly corresponding to the face (to make further processing easier)
-           1. write phoneme-frame information to both a txt and a mat file. The txt file contains two columns (frame number and phoneme), the mat files is similar (see helpFunctions.py).
+           1. write phoneme-frame information to both a txt and a mat file
            1. remove unneccessary frames
            1. extract faces and mouths, storing them in 'faces' and 'mouths' folders
            1. convert images to grayscale
            1. resize the mouth images, to make them all the same size
-      - there are several parameters you can change for your application  
-      - the final images will have a filename of the structure 'videoName_frameNumber_imageType.jpg' where imageType can be 'face', 'face_gray', 'mouth' or 'mouth_gray'.  
+      - there are several parameters you can change for your application
 5. `helpFunctions.py`: contains implementations of functions that are used in processDatabase.py
 
 6. `fileDirOps.py`:  This was used to filter the extracted database files for grayscale resized mouth images and the phoneme-frame txt files. The phoneme corresponding to each image was added to the image name. The files were then copied to another directory, and pickled for later usage in neural networks.
@@ -54,13 +53,13 @@ The most important folders and files are:
     1. `shape_predictor_68_face_landmarks.dat`: used by dlib to detect 68 facial landmarks, wihch are used to the mouth region. See `dlibLandmarks.png` for a visualization of the landmark locations.  
     
     
-In short: in order to use the database, do this:  
-1. download and extract it (folder downloadTCDTIMIT) . Watch out, the whole database is about 350GB. Lipspeakers alone are about 80GB. Volunteers are 260GB
-2. update the MLF files for lipspeakers and volunteers to point to wherever you downloaded and extracted the database  
-3. change the paths in main.py, i suggest first extracting the lipspeakers (you can use the test MLF as well)  
-4. wait till the script finishes.  
-5. if you want to do further extraction, you could use fileDirOps.py to get specific files/folders and/or pickle them  
-6. done!  
+In short: in order to use the database, do this:
+1. download and extract it (folder downloadTCDTIMIT)
+2. update the MLF files for lipspeakers and volunteers to point to wherever you downloaded and extracted the database
+3. change the paths in main.py, i suggest first extracting the lipspeakers (you can use the test MLF as well)
+4. wait
+5. if you want to do further extraction, you could use fileDirOps.py to get specific files/folders and/or pickle them
+6 done!
 
-If you have any questions, you can reach me under:  
+If you have any questions, you can reach me under:
 matthijsvankeirsbilck@gmail.com

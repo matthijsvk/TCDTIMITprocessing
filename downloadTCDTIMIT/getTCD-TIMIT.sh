@@ -1,25 +1,4 @@
 #!/bin/bash
-#MIT License
-#
-#Copyright (c) 2016 matthijs van keirsbilck
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in all
-#copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#SOFTWARE.
 
 # This script downloads the TCD-TIMIT database to the current directory, creating a proper directory structure
 # HOW TO USE:
@@ -27,11 +6,9 @@
 # 2. download the firefox plugin 'cliget'
 # 3. go to some file on the TCD- TIMIT downloads page, right click, and 'copy curl for link' in the cliget menu
 # 4. get the 'Cookie' header, and replace the link in this script with it
-# 5. then run in terminal: bash getTCD-TIMIT.sh downloadLocation
-cookieHeader='Cookie: has_js=1; SSESSa08f1a9d41786c65667603b759c65eb0=hsTIknn8-Ixlh0ZlZv-YV0EKaI0Lw3SIAOmUv4SuH8Q'
+cookieHeader='Cookie: has_js=1; SSESSa08f1a9d41786c65667603b759c65eb0=Kfnjpyh3YTufGYIBWcHhIQAVVFhQIR1JrVqa-_a_sp8'
 
-topDir="$1"
-cd $topDir
+topDir="$PWD"
 echo "Downloading the TCD- TIMIT database to $topDir"
 echo "############################################################################"
 
@@ -49,7 +26,7 @@ mkdir -p lipspeakers
 mkdir -p volunteers
 
 
-IFS=' ' read -ra line <<< `cat downloadLocations.txt`
+IFS=' ' read -ra line <<< `cat $1`  
 
 for i in "${line[@]}"; do
 	if [[ $i =~ .*https* ]]; then  # for the URL, you should be cd'ed into the right place. Now download the file.

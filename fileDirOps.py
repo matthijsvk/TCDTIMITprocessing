@@ -1,25 +1,3 @@
-# MIT License
-#
-# Copyright (c) 2016 matthijs van keirsbilck
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 from __future__ import print_function
 # this file contains different operations on files and directories:
 #   1. fixNames: files generated with old functions give mouth images, stored as 'videoName_faces_frameNb.jpg'
@@ -99,7 +77,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
         else:
             if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
-
+            
 def copyDBFiles(rootDir, names, targetRoot):
     from shutil import copyfile
     dirList = []
@@ -116,13 +94,13 @@ def copyDBFiles(rootDir, names, targetRoot):
             if extension == ".txt":
                 path = ''.join([root, os.sep, file])
                 fileList.append(path)
-
+    
     print("First 10 files to be copied: ", fileList[0:10])
 
     if query_yes_no("Are you sure you want to copy all these directories %s to %s?" %(rootDir, targetRoot) , "yes"):
         nbCopiedDirs = 0
         nbCopiedFiles = 0
-
+        
         for dir in dirList:
             relativePath = relpath(rootDir, dir)
             relativePath = relativePath.replace('/mouths_gray_120','')
@@ -130,14 +108,14 @@ def copyDBFiles(rootDir, names, targetRoot):
             #print("copying dir:", dir, " to: ", dest)
             copytree(dir, dest)
             nbCopiedDirs +=1
-
+        
         for file in fileList:
             relativePath = relpath(rootDir, file)
             #print("copying file:", file, " to: ", targetRoot+os.sep+relativePath)
             dest = ''.join([targetRoot+os.sep+relativePath])
             copyfile(file, dest)
             nbCopiedFiles +=1
-
+            
         print(nbCopiedDirs, " directories have been copied to ", targetRoot)
         print(nbCopiedFiles, " files have been copied to ", targetRoot)
     return dirList
@@ -157,7 +135,7 @@ def addPhonemesToImageNames(videoDir):
             parts = line.split()  # split line into parts
             if len(parts) > 1:  # if at least 2 parts/columns
                 validFrames[str(parts[0])] = parts[1]  # dict, key= frame, value = phoneme
-
+    
     # print("validFrames: ", validFrames)
     nbRenamed = 0
     for root, dirs, files in os.walk(videoDir):
@@ -180,7 +158,7 @@ def addPhonemesToImageNames(videoDir):
                 videoName = file.split("_")[1]
                 newFilePath = filePath.replace(videoName+os.sep,'')
                 os.rename(filePath, newFilePath)
-
+                
     #print("Finished renaming ", nbRenamed, " files.")
     return 0
 
@@ -227,12 +205,12 @@ def speakerToBinary(speakerDir, binaryDatabaseDir):
     from PIL import Image
     import pickle
     import time
-
+    
     rootDir = speakerDir
     targetDir = binaryDatabaseDir
     if not os.path.exists(targetDir):
         os.makedirs(targetDir)
-
+    
     # get list of images and list of labels
     images = []
     labels = []
@@ -246,63 +224,25 @@ def speakerToBinary(speakerDir, binaryDatabaseDir):
                 #print(path, " is \t ", phoneme)
                 images.append(path)
                 labels.append(phoneme)
-
+    
     # write label and image to binary file, 1 label+image per row
     speakerName = os.path.basename(rootDir)
-
-    if not "Lipspkr" in speakerName:
-        # for the volunteers, remove 'M' or 'F' for easier loading in lipreadingTCDTIMIT.py
-        speakerName = speakerName.replace("M", "")
-        speakerName = speakerName.replace("F", "")
-        # also remove leading zeros
-        speakerName = speakerName.lstrip("0")
-        speakerName = "Volunteer"+speakerName
-
     outputPath = targetDir + os.sep + speakerName+".pkl"
-
-<<<<<<< HEAD
-    if not os.path.exists(outputPath):
-        rowsize = 120*120
-        data = np.zeros(shape=(len(images), rowsize), dtype=np.uint8)
-        labelNumbers = [0]*len(images)
-
-        print(data.shape)
-
-        # two-way dictionary phoneme-label number
-        phonemeNumberMap = getPhonemeNumberMap()
-        for i in range(len(images)):
-            label = labels[i]
-            image = images[i]
-
-            labelNumber = phonemeNumberMap[label]
-            labelNumbers[i] = labelNumber
-
-            im = np.array(Image.open(image), dtype=np.uint8).flatten() # flatten to one row per image
-            data[i] = im
-        # now write python dict to a file
-            print("the data file takes: ", data.nbytes, " bytes of memory")
-            mydict = {'data': data, 'labels': labelNumbers}
-            output = open(outputPath, 'wb')
-            pickle.dump(mydict, output, 2)
-            output.close()
-    else:
-        print(outputPath, " already exists")
-=======
+    
     rowsize = 120*120
     data = np.zeros(shape=(len(images), rowsize), dtype=np.uint8)
     labelNumbers = [0]*len(images)
-
+    
     print(data.shape)
-
-    # two-way dictionary phoneme-label number
-    phonemeNumberMap = getPhonemeNumberMap()
+   
     for i in range(len(images)):
         label = labels[i]
         image = images[i]
 
+        phonemeNumberMap = getPhonemeNumberMap()
         labelNumber = phonemeNumberMap[label]
         labelNumbers[i] = labelNumber
-
+    
         im = np.array(Image.open(image), dtype=np.uint8).flatten() # flatten to one row per image
         data[i] = im
     # now write python dict to a file
@@ -311,7 +251,6 @@ def speakerToBinary(speakerDir, binaryDatabaseDir):
     output = open(outputPath, 'wb')
     pickle.dump(mydict, output, 2)
     output.close()
->>>>>>> d187a6f45346f9078c24c8e24109cfbc13e29016
     print(speakerName, "files have been written to: ", outputPath)
     return 0
 
@@ -329,29 +268,23 @@ def allSpeakersToBinary(databaseDir, binaryDatabaseDir):
         print("Extracting files of: ", speakerDir)
         speakerToBinary(speakerDir, binaryDatabaseDir)
     return 0
-
-
-
+        
+        
+        
 if __name__ == "__main__":
 
     # use this to copy the grayscale files from 'processDatabase' to another location, and fix their names with phonemes
     # then convert to files useable by CIFAR10 code
-
-<<<<<<< HEAD
-    processedDir = os.path.expanduser("~/TCDTIMIT/processed")
-    databaseDir = os.path.expanduser("~/TCDTIMIT/database")
-    databaseBinaryDir = os.path.expanduser("~/TCDTIMIT/database_binary")
-=======
-    processedDir = os.path.expanduser("~/TCDTIMIT/extracted")
-    databaseDir = os.path.expanduser("~/TCDTIMIT/volunteers_database")
-    databaseBinaryDir = os.path.expanduser("~/TCDTIMIT/volunteers_binary")
->>>>>>> d187a6f45346f9078c24c8e24109cfbc13e29016
-
+    
+    processedDir = os.path.expanduser("~/TCDTIMIT/test/processed3")
+    databaseDir = os.path.expanduser("~/TCDTIMIT/test/database")
+    databaseBinaryDir = os.path.expanduser("~/TCDTIMIT/test/database_binary")
+    
     # 1. copy mouths_gray_120 images and PHN.txt files to targetRoot. Move files up from their mouths_gray_120 dir to the video dir (eg sa1)
     print("Copying mouth_gray_120 directories to database location...")
     copyDBFiles(processedDir, ["mouths_gray_120"], databaseDir)
     print("-----------------------------------------")
-
+    
     # 2. extract phonemes for each image, put them in the image name
     # has to be called against the 'database' directory
     print("Adding phoneme to filenames, moving files up to speakerDir...")
@@ -365,8 +298,8 @@ if __name__ == "__main__":
     allSpeakersToBinary(databaseDir, databaseBinaryDir)
     print("The final binary files can be found in: ", databaseBinaryDir)
     print("-----------------------------------------")
-
-
+    
+    
     # Other functions that are not normally needed
     # 1. deleting directories, not needed
     # root = "/home/user/TCDTIMIT/processed"
@@ -397,13 +330,13 @@ def fixNames (rootDir):
                     print(filePath + "\t -> \t" + fileNewPath)
                     # os.rename(filePath, fileNewPath)
                     nbRenames += 1
-
+    
     # Step 2: names are in proper format, now move to mouths folder (because the images contain mouths, not faces)
     nbMoves = 0
     for root, dirs, files in os.walk(rootDir):
         files.sort(key=tryint)
         for file in files:
-
+            
             if "face" in file:  # sanity check
                 filePath = os.path.join(root, file)
                 parentDir = os.path.dirname(root)
@@ -417,7 +350,7 @@ def fixNames (rootDir):
                 print(filePath + "\t -> \t" + fileNewPath)
                 # os.rename(filePath, fileNewPath)
                 nbMoves += 1
-
+    
     print(nbRenames, " files have been renamed.")
     print(nbMoves, "files have been moved.")
     return 0

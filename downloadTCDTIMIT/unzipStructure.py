@@ -1,29 +1,7 @@
-# MIT License
-#
-# Copyright (c) 2016 matthijs van keirsbilck
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 import zipfile, os.path
 import concurrent.futures
 import threading
-
+   
 from helpFunctions import *
 import os, errno
 import subprocess
@@ -35,7 +13,7 @@ def silentremove (filename):
     except OSError as e:  # name the Exception `e`
         pass #print("Failed with:", e.strerror)  # look what it says
     return 0
-
+    
 # create a list with paths of all zip files
 def createZipList(rootDir):
     zipList= []
@@ -56,7 +34,7 @@ def extractZip(filePath, delete=False):
     if (delete):
         silentremove(filePath)
     return 0
-
+    
 ######################################
 ########## Main Function #############
 ######################################
@@ -80,7 +58,7 @@ if query_yes_no("Would you like to process these zip files?", "yes"):
             currentZips = zipList[batchIndex:]  # till the end
         else:
             currentZips = zipList[batchIndex:batchIndex + batchSize]
-
+    
         # execute the commands
         futures = []
         for i in range(len(currentZips)):
@@ -88,13 +66,13 @@ if query_yes_no("Would you like to process these zip files?", "yes"):
             print("Unzipping ", filePath)
             futures.append(executor.submit(extractZip, filePath, deleteZips))
         concurrent.futures.wait(futures)
-
+    
         # update the batchIndex
         batchIndex += batchSize
-
+            
         print "One batch complete."
         print "---------------------------------"
-
+    
     print "All done!"
 else:
     print("Okay, then goodbye!")
@@ -102,4 +80,4 @@ else:
 
 
 
-
+    

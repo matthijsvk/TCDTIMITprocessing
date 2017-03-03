@@ -1,25 +1,3 @@
-# MIT License
-#
-# Copyright (c) 2016 matthijs van keirsbilck
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 #!/usr/bin/python
 
 #### help functions
@@ -79,7 +57,7 @@ def query_yes_no (question, default="yes"):
         prompt = " [y/N] "
     else:
         raise ValueError("invalid default answer: '%s'" % default)
-
+    
     while True:
         sys.stdout.write(question + prompt)
         choice = raw_input().lower()
@@ -138,7 +116,7 @@ def readfile (filename):
                 else:  # create new 2nd-level list, now store there
                     array.append([line])
                     video_index += 1
-
+    
     return array[1:]
 
 
@@ -150,18 +128,18 @@ def readfile (filename):
 def processVideoFile (videoPhonemeList, timeModifier=0.5):
     videoPath = str(videoPhonemeList[0]).replace('"', '')
     videoPath = videoPath.replace('rec', 'mp4')
-
+    
     phonemes = []  # list of tuples, 1= time. 2=phoneme
-
+    
     for idx, line in enumerate(
             videoPhonemeList[1:]):  # skip the path line; then just three columns with tabs in between
         splittedLine = line.split()  # split on whitespaces
-
+        
         phoneme = splittedLine[2]
-
+        
         start = float(splittedLine[0]) / 10000000
         end = float(splittedLine[1]) / 10000000
-
+        
         # if (idx == 0 ):  #beginning or end = silence, take the best part  #TODO
         #     extractionTime = start
         # elif (idx == len(videoPhonemeList[1:])-1):
@@ -169,9 +147,9 @@ def processVideoFile (videoPhonemeList, timeModifier=0.5):
         # else:
         extractionTime = start * (1 - timeModifier) + (timeModifier) * end
         extractionTime = "{0:.3f}".format(extractionTime)  # three decimals
-
+        
         phonemes.append((extractionTime, phoneme))  # add the (time,phoneme) tuple
-
+    
     return videoPath, phonemes
 
 
@@ -204,11 +182,11 @@ def getValid (phonemes, framerate):  # frameRate = 29.97 for the TCDTimit databa
 def writePhonemesToFile (videoName, speakerName, phonemes, targetDir):
     validTimes, validFrames, validPhonemes = getValid(phonemes, 29.97)
     phonemeFile = ''.join([targetDir, os.sep, speakerName, "_", videoName, "_PHN.txt"])
-
+    
     # add 1 to the validFrames to fix the ffmpeg issue (starts at 1 instead of 0)
     for i in range(0, len(validFrames)):
         validFrames[i] += 1
-
+    
     # write to text file
     thefile = open(phonemeFile, 'w')
     for i in range(len(validFrames) - 1):
@@ -217,11 +195,11 @@ def writePhonemesToFile (videoName, speakerName, phonemes, targetDir):
     item = (validFrames[-1], validPhonemes[-1])
     thefile.write(' '.join(map(str, item)))
     thefile.close()
-
+    
     # also write a mat file
     matPath = targetDir + os.sep + "phonemeFrames.mat"
     sio.savemat(matPath, {'validFrames': np.array(validFrames), 'validPhonemes': np.array(validPhonemes)})
-
+    
     return 0
 
 # used to keep folder structure, but under different root path
@@ -242,7 +220,7 @@ def fixStoreDirName (storageLocation, videoName, pathLine):
     storeDir, second = storeDir.split("Clips")
     if storeDir.endswith('/'):
         storeDir = storeDir[:-1]
-
+    
     # now add the video Name
     storeDir = ''.join([storeDir, os.sep, videoName])
     return storeDir
@@ -259,7 +237,7 @@ def deleteUnneededFiles (videoDir):
             parts = line.split()  # split line into parts
             if len(parts) > 1:  # if at least 2 parts/columns
                 validFrames.append(parts[0])  # print column 2
-
+    
     # walk through the files, if a file doesn't contain '_validFrame', then remove it.
     nbRemoved = 0
     for root, dirs, files in os.walk(videoDir):
@@ -296,36 +274,39 @@ def extractAllFrames (videoPath, videoName, storeDir, framerate, targetSize, cro
         # eg vid1_. frame number and extension will be added by ffmpeg
         outputPath = ''.join(
                 [storeDir, os.sep, videoName, "_", ])  # eg .../sa1_3.jpg (frame and extension added by ffmpg)
-
+        
         command = ['ffmpeg',
                    '-i', videoPath,
                    '-s', targetSize,
                    '-vf', "crop=" + targetSize + ":" + cropStartPixel,
                    outputPath + "%d.jpg"]  # add frame number and extension
-
+        
         # actually run the command, only show stderror on terminal, close the processes (don't wait for user input)
         FNULL = open(os.devnull, 'w')
         p = subprocess.Popen(command, stdout=FNULL, stderr=subprocess.STDOUT, close_fds=True)  # stdout=subprocess.PIPE
         return 1
-
+    
     else:
         return 0
 
 
 # detect faces in all jpg's in sourceDir
 # extract faces to "storeDir/faces", and mouths to "storeDir/mouths"
-def extractFacesMouths (sourceDir, storeDir, detector, predictor):
-    # if not os.path.exists(predictor_path):
-    #     print('Landmark predictor not found!')
-    #     # sys.exit(1)
+def extractFacesMouths (sourceDir, storeDir, predictor_path):
+    if not os.path.exists(predictor_path):
+        print('Landmark predictor not found!')
+        # sys.exit(1)
     storeFaceDir = storeDir + os.sep + "faces"
     if not os.path.exists(storeFaceDir):
         os.makedirs(storeFaceDir)
-
+    
     storeMouthsDir = storeDir + os.sep + "mouths"
     if not os.path.exists(storeMouthsDir):
         os.makedirs(storeMouthsDir)
-
+    
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor(predictor_path)
+    
     for f in glob.glob(os.path.join(sourceDir, "*.jpg")):
         dets = []
         fname, ext = os.path.splitext(os.path.basename(f))
@@ -334,11 +315,11 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor):
                 # print(f)
                 facePath = storeFaceDir + os.sep + fname + "_face.jpg"
                 mouthPath = storeMouthsDir + os.sep + fname + "_mouth.jpg"
-
+                
                 if os.path.exists(facePath):
-                    # print(facePath, " already exists")
+                    print(facePath, " already exists")
                     continue
-
+                
                 img = io.imread(f,as_grey=True)
                 width, height = img.shape[:2]
 
@@ -356,10 +337,9 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor):
                     dim = (int(width / resizer), int(height / resizer))
                     imgSmall = resize(img, dim)
                     imgSmall = img_as_ubyte(imgSmall)
-
+                    
                     dets = detector(imgSmall, 1)
                     if len(dets) == 0:
-                        print(f)
                         print("still no faces found. Using previous face coordinates...")
                         if 'top' in locals(): #could be issue if no face in first image ? #TODO
                             face_img = img[top:bot, left:right]
@@ -370,7 +350,7 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor):
                         else:
                             print("top not in locals. ERROR")
                         continue
-
+                
                 d = dets[0]
                 # extract face, store in storeFacesDir
                 left = d.left() * resizer
@@ -384,7 +364,7 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor):
                 if (bot > height):  bot = height
                 face_img = img[top:bot, left:right]
                 io.imsave(facePath, face_img)  # save face image
-
+                
                 # now detect mouth landmarks
                 # detect 68 keypoints, see dlibLandmarks.png
                 shape = predictor(imgSmall, d)
@@ -398,7 +378,7 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor):
                 if (mw > width):   mw = width
                 if (my < 0):       my = 0
                 if (mh > height):  mh = height
-
+                
                 # scale them to get a better image of the mouth
                 widthScalar = 1.5
                 heightScalar = 1
@@ -406,14 +386,14 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor):
                 # my = int(my - (heightScalar - 1)/2.0*mh) #not needed, we already have enough nose
                 mw = int(mw * widthScalar)
                 mh = int(mh * widthScalar)
-
+                
                 mouth_img = img[my:my + mh, mx:mx + mw]
                 io.imsave(mouthPath, mouth_img)
             except:
                 print("Unexpected error:", sys.exc_info()[0])
                 print(traceback.format_exc())
                 raise
-
+            
 
 def resize_image (filePath, filePathResized, keepAR=True, width=120.0):
     im = io.imread(filePath)
@@ -432,7 +412,7 @@ def resizeImages (rootDir, dirNames, keepAR=True, width=640.0):
         targetDirPath = rootDir + os.sep + dirName + "_" + str(int(width))
         if not os.path.exists(targetDirPath):
             os.makedirs(targetDirPath)
-
+        
         # loop through the files
         onlyfiles = [f for f in listdir(dirPath) if isfile(join(dirPath, f))]
         onlyfiles.sort(key=tryint)
@@ -466,10 +446,10 @@ def convertToGrayScale (rootDir, dirNames):
                     # with OpenCV: weird results (gray image larger than color ?!?)
                     # img = cv2.imread(root+os.sep+file, 0)
                     # cv2.imwrite(newFilePath, img)
-
+                    
                     img_gray = rgb2gray(io.imread(root + os.sep + file))
                     io.imsave(newFilePath, img_gray)  # don't write to disk if already exists
                     nbConverted += 1
-
+    
     # print(nbConverted, " files have been converted to Grayscale")
     return 0
