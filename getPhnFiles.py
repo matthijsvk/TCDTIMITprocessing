@@ -1,29 +1,39 @@
-from helpFunctions import *
 import os
-
-from copyFilesOfType import *
+from tqdm import tqdm
+import filecmp
+from utils.helpFunctions import *
+from utils.helpFunctions import *
 
 def generatePHN(MLFfile, dstDir):
     videos = readMLFfile(MLFfile)
 
-    i=0
-    for video in videos:
-        if i==0:
+    for video in tqdm(videos):
             videoPath, phonemes = processVideoPhonemes(video)
-            phonemes=  timeToFrame(phonemes)
+            phonemes =  timeToFrame(phonemes)
             videoDir = os.path.splitext(videoPath)[0]
             videoName = os.path.basename(videoDir)
             speakerPath = os.path.dirname(os.path.dirname(os.path.dirname(videoDir)))
             speakerName = os.path.basename(speakerPath)
 
-            storeDir = fixStoreDirName(dstDir, videoName, video[0])
-            # speakerName = os.path.basename(os.path.dirname(storeDir))
-            print("Extracting PHN files from ", videoPath, ", saving to: \t", storeDir)
+            if not "TCDTIMIT/" in speakerPath: raise Exception(
+                "Can't extract phonemes; you have to create a 'TCDTIMIT' top level directory!!"); sys.exit(-1)
+            oldStoragePath, relPath = speakerPath.split("TCDTIMIT/")  # /home/data/TCDTIMIT/volunteers/...
 
-            phonemePath = ''.join([storeDir, os.sep, videoName, ".phn"]) #speakerName, "_", videoName, ".phn"])
-            print phonemePath
-            writeToTxt(phonemes,phonemePath)
-            # i+=1
+            # remove unneeded folders; store directly under TCDTIMIT/
+            topDir = relPath.split('/')[0]
+            while not (topDir == "volunteers" or topDir == "lipspeakers"):
+                relPath = '/'.join(relPath.split('/')[1:])
+                topDir = relPath.split('/')[0]
+
+            storeDir = ''.join([dstDir, os.sep, relPath])
+            if storeDir.endswith('/'):  storeDir = storeDir[:-1]
+            storeDir = ''.join([storeDir, os.sep, videoName])
+
+            phonemePath = ''.join([storeDir, os.sep, videoName, ".phn"])
+            writeToTxt(phonemes, phonemePath)
+
+            # print("Extracting PHN files from ", videoPath, ", saving to: \t", storeDir)
+            # print phonemePath
 
     tcdtimitdir = os.path.dirname(os.path.dirname(speakerPath))
     return tcdtimitdir
@@ -38,7 +48,6 @@ def timeToFrame(phonemes):
 
         phonemeFrames.append( (startFrame, endFrame, phoneme)) #, extractionFrame) )  #TODO add extractionframe if extraction moment is changed for lipreading
     return phonemeFrames
-
 
 
 if __name__ == '__main__':

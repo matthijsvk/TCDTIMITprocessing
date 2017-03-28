@@ -91,7 +91,7 @@ def copyDBFiles(rootDir, names, targetRoot):
         for file in files:
             name, extension = os.path.splitext(file)
             # copy phoneme files as well
-            if extension == ".txt":
+            if extension == ".txt":         #TODO Change to .VPHN after renaming done
                 path = ''.join([root, os.sep, file])
                 fileList.append(path)
     
@@ -309,9 +309,9 @@ def allSpeakersToBinary(databaseDir, binaryDatabaseDir):
 if __name__ == "__main__":
 
     # use this to copy the grayscale files from 'processDatabase' to another location, and fix their names with phonemes
-    # then convert to files useable by CIFAR10 code
+    # then convert to files useable by lipreading network
     
-    processedDir = os.path.expanduser("~/TCDTIMIT/test/processed3")
+    processedDir = os.path.expanduser("~/TCDTIMIT/test/processed")
     databaseDir = os.path.expanduser("~/TCDTIMIT/test/database")
     databaseBinaryDir = os.path.expanduser("~/TCDTIMIT/test/database_binary")
     
