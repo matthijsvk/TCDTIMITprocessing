@@ -1,6 +1,7 @@
 import os
 # from utils.helpFunctions import *
 # from utils.copyFilesOfType import *
+from utils.removeEmptyDirs import *
 from fixTCDTIMITwavStructure import *
 from getPhnFiles import *
 
@@ -17,7 +18,9 @@ generatePHN("MLFfiles/volunteer_labelfiles.mlf", dstDir)
 ## WAV
 # get the wav files
 print("EXTRACTING WAVS...")
-# copyFilesOfType(srcDir, os.path.expanduser("~/TCDTIMIT/TCDTIMITaudio"), "wav", interactive=False)
+copyFilesOfType(srcDir, dstDir, "wav", interactive=False)
+removeEmptyFolders(dstDir, False) #don't remove root dir
+
 # fix the wav structure
 print("fixing directory structure...")
-fixTCDTIMITwavStructure(os.path.expanduser("~/TCDTIMIT/TCDTIMITaudio"))
+fixTCDTIMITwavStructure(dstDir)

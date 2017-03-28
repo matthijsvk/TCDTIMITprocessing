@@ -8,6 +8,7 @@ def fixTCDTIMITwavStructure(dir, extension=".wav", interactive=False):
     src = []
     dest = []
     for root, dirs, files in os.walk(dir):
+
         for file_ in files:
             if file_.endswith(extension):
                 srcPath = os.path.join(root, file_)
