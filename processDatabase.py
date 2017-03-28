@@ -29,7 +29,7 @@ from helpFunctions import *
 ### Executing ###
 def processDatabase (MLFfile, storageLocation, nbThreads=2):
     print("###################################")
-    videos = readfile(MLFfile)
+    videos = readMLFfile(MLFfile)
     print("There are ", len(videos), " videos to be processed...")
     framerate = 29.97
     batchSize = nbThreads  # number of videos per iteration

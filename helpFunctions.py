@@ -4,27 +4,18 @@
 from __future__ import print_function
 
 # remove without complaining
-import os, errno
+import os, os.path
 import subprocess
-import getopt
 import traceback
-import zipfile, os.path
-import concurrent.futures
-import threading
-import time
-import shutil
 import sys
 import glob
 from os import listdir
 from os.path import isfile, join
 
-
 import numpy as np
 import scipy.io as sio
-import cv2
 import dlib
 from skimage import io
-from skimage import data
 from skimage.transform import resize
 from skimage.color import rgb2gray
 from skimage import img_as_ubyte
@@ -88,11 +79,32 @@ def tryint (s):
         except:
             return t
 
+def writeToTxt(lines, path):
+    if (not os.path.exists(os.path.dirname(path))):
+        os.makedirs(os.path.dirname(path))
+    file = open(path, 'w')
+    for line in lines:
+        writeLine(lines, line, file)
+    file.close()
 
+def writeLine(lines, line, file):
+    # don't write newline after last element
+    if (lines.index(line) < len(lines) - 1):
+        writeNewLine = True
+    else:
+        writeNewLine = False
+
+    # if a line is a list, there are several elements you want to write on that line. need to convert to str before writing
+    if isinstance(line, list) or isinstance(line, tuple):
+        line = ' '.join(map(str, line))
+
+    if writeNewLine:
+        file.write("%s\n" % line)
+    else:
+        file.write("%s" % line)
 #######################################################
 ################# Actual functions ####################
 #######################################################
-
 
 # read all the times from the mlf file, split on line with new video
 # create a list of lists. The higher-level list contains the block of one video, the 2nd-level list contains all the lines of that video
@@ -104,7 +116,7 @@ def tryint (s):
 #    etc
 # http://stackoverflow.com/questions/3277503/how-to-read-a-file-line-by-line-into-a-list-with-python#3277516
 
-def readfile (filename):
+def readMLFfile (filename):
     with open(filename, "r") as ins:
         array = [[]]
         video_index = 0
@@ -150,6 +162,34 @@ def processVideoFile (videoPhonemeList, timeModifier=0.5):
         
         phonemes.append((extractionTime, phoneme))  # add the (time,phoneme) tuple
     
+    return videoPath, phonemes
+
+
+def processVideoPhonemes(videoPhonemeList, timeModifier=0.5):
+    videoPath = str(videoPhonemeList[0]).replace('"', '')
+    videoPath = videoPath.replace('rec', 'mp4')
+
+    phonemes = []  # list of tuples, 1= time. 2=phoneme
+
+    for idx, line in enumerate(
+            videoPhonemeList[1:]):  # skip the path line; then just three columns with tabs in between
+        splittedLine = line.split()  # split on whitespaces
+
+        phoneme = splittedLine[2]
+
+        start = float(splittedLine[0]) / 10000000
+        end = float(splittedLine[1]) / 10000000
+
+        # if (idx == 0 ):  #beginning or end = silence, take the best part  #TODO
+        #     extractionTime = start
+        # elif (idx == len(videoPhonemeList[1:])-1):
+        #     extractionTime = end
+        # else:
+        extractionTime = start * (1 - timeModifier) + (timeModifier) * end
+        extractionTime = "{0:.3f}".format(extractionTime)  # three decimals
+
+        phonemes.append((start, end, phoneme, extractionTime))  # add the (time,phoneme) tuple
+
     return videoPath, phonemes
 
 

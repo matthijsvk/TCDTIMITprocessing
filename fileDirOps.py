@@ -188,6 +188,23 @@ def addPhonemesToImagesDB(rootDir):
         shutil.rmtree(dir)
     return 0
 
+# for training on visemes
+def getPhonemeToVisemeMap():
+    map = {'f':'A','v':'A',
+            'er':'B','ow':'B','r':'B','q':'B','w':'B','uh':'B','uw':'B','axr':'B','ux':'B',
+             'b':'C','p':'C','m':'C','em':'C',
+             'aw':'D',
+             ' dh':'E','th':'E',
+             'ch':'F','jh':'F','sh':'F','zh':'F',
+             'oy':'G', 'ao':'G',
+             's':'H', 'z':'H',
+             'aa':'I','ae':'I','ah':'I','ay':'I','ey':'I','ih':'I','iy':'I','y':'I','eh':'I','ax-h':'I','ax':'I','ix':'I',
+             'd':'J','l':'J','n':'J','t':'J','el':'J','nx':'J','en':'J','dx':'J',
+             'g':'K','k':'K','ng':'K','eng':'K',
+             'sil':'S','pcl':'S','tcl':'S','kcl':'S','bcl':'S','dcl':'S','gcl':'S','h#':'S','#h':'S','pau':'S','epi':'S'
+    }
+    return map
+
 # helpfunction
 def getPhonemeNumberMap (
         phonemeMap="./background/phonemeLabelConversion.txt"):
@@ -200,6 +217,18 @@ def getPhonemeNumberMap (
                 phonemeNumberMap[str(parts[1])] = parts[0]
     return phonemeNumberMap
 
+# helpfunction
+def getVisemeNumberMap (
+        visemeMap="./background/visemeLabelConversion.txt"):
+    visemeNumberMap = {}
+    with open(visemeMap) as inf:
+        for line in inf:
+            parts = line.split()    # split line into parts
+            if len(parts) > 1:      # if at least 2 parts/columns
+                visemeNumberMap[str(parts[0])] = parts[1]  # part0= frame, part1 = viseme
+                visemeNumberMap[str(parts[1])] = parts[0]
+    return visemeNumberMap
+
 def speakerToBinary(speakerDir, binaryDatabaseDir):
     import numpy as np
     from PIL import Image
@@ -211,7 +240,7 @@ def speakerToBinary(speakerDir, binaryDatabaseDir):
     if not os.path.exists(targetDir):
         os.makedirs(targetDir)
     
-    # get list of images and list of labels
+    # get list of images and list of labels (= phonemes)
     images = []
     labels = []
     for root, dirs, files in os.walk(rootDir):
@@ -228,7 +257,8 @@ def speakerToBinary(speakerDir, binaryDatabaseDir):
     # write label and image to binary file, 1 label+image per row
     speakerName = os.path.basename(rootDir)
     outputPath = targetDir + os.sep + speakerName+".pkl"
-    
+
+    # store in dict with data and 'labelNumber' values.
     rowsize = 120*120
     data = np.zeros(shape=(len(images), rowsize), dtype=np.uint8)
     labelNumbers = [0]*len(images)
@@ -239,9 +269,14 @@ def speakerToBinary(speakerDir, binaryDatabaseDir):
         label = labels[i]
         image = images[i]
 
+        # for mapping to phonemes (nbClasses = 39)
         phonemeNumberMap = getPhonemeNumberMap()
-        labelNumber = phonemeNumberMap[label]
-        labelNumbers[i] = labelNumber
+        labelNumber = phonemeNumberMap[label]     # you could also use the phoneme to viseme map afterwards.
+
+        # for mapping to visemes (nbClasses = 12)
+        # phonemeToViseme = getPhonemeToVisemeMap()  # dictionary of phoneme-viseme key-value pairs
+        # labelNumber = visemeNumberMap{phonemeToViseme{label}}  # viseme of the phoneme, then get the number of this viseme
+        # labelNumbers[i] = labelNumber
     
         im = np.array(Image.open(image), dtype=np.uint8).flatten() # flatten to one row per image
         data[i] = im
