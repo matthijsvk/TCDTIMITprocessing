@@ -19,8 +19,10 @@ generatePHN("MLFfiles/volunteer_labelfiles.mlf", dstDir)
 # get the wav files
 print("EXTRACTING WAVS...")
 copyFilesOfType(srcDir, dstDir, "wav", interactive=False)
-removeEmptyFolders(dstDir, False) #don't remove root dir
 
 # fix the wav structure
 print("fixing directory structure...")
 fixTCDTIMITwavStructure(dstDir)
+
+# clean up
+removeEmptyFolders(dstDir, False)  # don't remove root dir
