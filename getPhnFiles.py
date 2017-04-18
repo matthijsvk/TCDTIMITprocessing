@@ -8,7 +8,7 @@ def generatePHN(MLFfile, dstDir):
     videos = readMLFfile(MLFfile)
 
     for video in tqdm(videos):
-            videoPath, phonemes = processVideoPhonemes(video)
+            videoPath, phonemes = processVideoPhonemes(video)  # phonemes contain start and end times in seconds
             phonemes =  timeToFrame(phonemes)
             videoDir = os.path.splitext(videoPath)[0]
             videoName = os.path.basename(videoDir)
@@ -41,7 +41,7 @@ def generatePHN(MLFfile, dstDir):
 def timeToFrame(phonemes):
     phonemeFrames = []
     for pair in phonemes:
-        startFrame = int(float(pair[0]) * 16000)
+        startFrame = int(float(pair[0]) * 16000)  #seconds to audioSamples @ 16kHz
         endFrame = int(float(pair[1]) * 16000)
         phoneme = pair[2]
         extractionFrame = int(float(pair[3]) * 16000)

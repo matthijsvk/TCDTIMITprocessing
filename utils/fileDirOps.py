@@ -14,6 +14,11 @@ import subprocess
 import shutil
 
 import numpy as np
+from PIL import Image
+import pickle
+import time
+
+import numpy as np
 
 from helpFunctions import *
 
@@ -120,47 +125,6 @@ def copyDBFiles(rootDir, names, targetRoot):
         print(nbCopiedFiles, " files have been copied to ", targetRoot)
     return dirList
 
-# extract phonemes for each image, put them in the image name
-def addPhonemesToImageNames(videoDir):
-    print("processing: ", videoDir)
-    # videoDir will be the lowest-level directory
-    videoName = os.path.basename(videoDir)
-    parentName = os.path.basename(os.path.dirname(videoDir))
-    import collections
-    validFrames = collections.OrderedDict({})
-    phonemeFile = ''.join([videoDir + os.sep + parentName + "_" + videoName + "_PHN.txt"])
-    #print(phonemeFile)
-    with open(phonemeFile) as inf:
-        for line in inf:
-            parts = line.split()  # split line into parts
-            if len(parts) > 1:  # if at least 2 parts/columns
-                validFrames[str(parts[0])] = parts[1]  # dict, key= frame, value = phoneme
-    
-    # print("validFrames: ", validFrames)
-    nbRenamed = 0
-    for root, dirs, files in os.walk(videoDir):
-        for file in files:
-            fileName, ext = os.path.splitext(file)
-            if ext == ".jpg":
-                filePath = ''.join([root,os.sep,file])
-                videoName = file.split("_")[0]
-                frameNumber = file.split("_")[1] #number-> after first underscore
-                if frameNumber in validFrames: #maybe some wrong picture got extracted
-                    phoneme = validFrames[frameNumber]
-                    newFileName = ''.join([videoName, "_", frameNumber, "_", phoneme, ext])
-                    parent = os.path.dirname(root)
-                    newFilePath = ''.join([parent, os.sep, newFileName ])
-                    # print(filePath, " will be renamed to: ", newFilePath)
-                    os.rename(filePath, newFilePath)
-                    nbRenamed += 1
-            if ext == ".txt": #the phoneme file
-                filePath = ''.join([root, os.sep, file])
-                videoName = file.split("_")[1]
-                newFilePath = filePath.replace(videoName+os.sep,'')
-                os.rename(filePath, newFilePath)
-                
-    #print("Finished renaming ", nbRenamed, " files.")
-    return 0
 
 # need this to traverse directories, find depth
 def directories (root):
@@ -173,8 +137,63 @@ def directories (root):
 def depth(path):
     return path.count(os.sep)
 
+
+# extract phonemes for each image, put them in the image name.
+# moveToSpeakerDir: - flattens dir structure: to also copy all the jpg and phn files to the speaker dir (so not 1 dir per video)
+#                   - also renames: remove speakername, replace '_PHN.txt' by '.vphn'
+def addPhonemesToImageNames(videoDir, moveToSpeakerDir=True):
+    # print("processing: ", videoDir)
+    # videoDir will be the lowest-level directory
+    videoName = os.path.basename(videoDir)
+    parentName = os.path.basename(os.path.dirname(videoDir))
+    import collections
+    validFrames = collections.OrderedDict({})
+    phoneme_extension = "_PHN.txt"
+    phonemeFile = ''.join([videoDir + os.sep + parentName + "_" + videoName + phoneme_extension])
+    # print(phonemeFile)
+    with open(phonemeFile) as inf:
+        for line in inf:
+            parts = line.split()  # split line into parts
+            if len(parts) > 1:  # if at least 2 parts/columns
+                validFrames[str(parts[0])] = parts[1]  # dict, key= frame, value = phoneme
+
+    # print("validFrames: ", validFrames)
+    nbRenamed = 0
+    for root, dirs, files in os.walk(videoDir):
+        for file in files:
+            fileName, ext = os.path.splitext(file)
+            if ext == ".jpg":
+                filePath = ''.join([root, os.sep, file])
+                videoName = file.split("_")[0]
+                frameNumber = file.split("_")[1]  # number-> after first underscore
+                if frameNumber in validFrames:  # maybe some wrong picture got extracted
+                    phoneme = validFrames[frameNumber]
+                    if moveToSpeakerDir:  #for use in seperate lipspeaking: all files from a speaker in same folder
+                        newFileName = ''.join([videoName, "_", frameNumber, "_", phoneme, ext])
+                    else:  # for use in combinedSR: files per speaker/video, not per speaker
+                        newFileName = ''.join([videoName, os.sep, videoName, "_", frameNumber, "_", phoneme, ext])
+                    parent = os.path.dirname(root)
+                    newFilePath = ''.join([parent, os.sep, newFileName])
+                    # print(filePath, " will be renamed to: ", newFilePath)
+                    os.rename(filePath, newFilePath)
+                    nbRenamed += 1
+            if file.endswith(phoneme_extension):  # the phoneme file
+                filePath = ''.join([root, os.sep, file])
+                speakerName, videoName = file.split("_")[0:2]
+
+                if moveToSpeakerDir:
+                    newFilePath = filePath.replace(videoName + os.sep, '')
+                else:
+                    newFilePath = filePath.replace("_PHN.txt", ".vphn")
+                    newFilePath = newFilePath.replace(speakerName + "_", '')
+
+                os.rename(filePath, newFilePath)
+    # print("Finished renaming ", nbRenamed, " files.")
+    return 0
+
+
 # now traverse the database tree and rename  files in all the directories
-def addPhonemesToImagesDB(rootDir):
+def addPhonemesToImagesDB(rootDir, moveToSpeakerDir=True):
     dirList = []
     for dir in directories(rootDir):
         # print(dir)
@@ -184,8 +203,8 @@ def addPhonemesToImagesDB(rootDir):
             dirList.append(dir)
     print("First 10 directories to be processed: ", dirList[0:10])
     for dir in dirList:
-        addPhonemesToImageNames(dir)
-        shutil.rmtree(dir)
+        addPhonemesToImageNames(dir, moveToSpeakerDir=moveToSpeakerDir)
+        if moveToSpeakerDir: shutil.rmtree(dir)
     return 0
 
 # for training on visemes
@@ -230,10 +249,6 @@ def getVisemeNumberMap (
     return visemeNumberMap
 
 def speakerToBinary(speakerDir, binaryDatabaseDir):
-    import numpy as np
-    from PIL import Image
-    import pickle
-    import time
     
     rootDir = speakerDir
     targetDir = binaryDatabaseDir
@@ -311,9 +326,9 @@ if __name__ == "__main__":
     # use this to copy the grayscale files from 'processDatabase' to another location, and fix their names with phonemes
     # then convert to files useable by lipreading network
     
-    processedDir = os.path.expanduser("~/TCDTIMIT/test/processed")
-    databaseDir = os.path.expanduser("~/TCDTIMIT/test/database")
-    databaseBinaryDir = os.path.expanduser("~/TCDTIMIT/test/database_binary")
+    processedDir = os.path.expanduser("~/TCDTIMIT/lipreading/processed")
+    databaseDir = os.path.expanduser("~/TCDTIMIT/lipreading/database")
+    databaseBinaryDir = os.path.expanduser("~/TCDTIMIT/lipreading/database_binary")
     
     # 1. copy mouths_gray_120 images and PHN.txt files to targetRoot. Move files up from their mouths_gray_120 dir to the video dir (eg sa1)
     print("Copying mouth_gray_120 directories to database location...")
@@ -323,7 +338,7 @@ if __name__ == "__main__":
     # 2. extract phonemes for each image, put them in the image name
     # has to be called against the 'database' directory
     print("Adding phoneme to filenames, moving files up to speakerDir...")
-    addPhonemesToImagesDB(databaseDir)
+    addPhonemesToImagesDB(databaseDir, moveToSpeakerDir=True)
     print("-----------------------------------------")
 
     # 3. convert all files from one speaker to a a binary file in CIFAR10 format:
@@ -399,7 +414,6 @@ def fixNames (rootDir):
 
 # convert from frame number to timing info. I didn't need this as I worked with frames all the time
 from shutil import copyfile
-
 
 def frameToTiming (rootDir):
     nbCopies = 0

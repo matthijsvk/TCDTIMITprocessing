@@ -9,7 +9,7 @@ from processDatabase import *
 ###################################################################################################
 startTime = time.clock()
 
-processDatabase('./MLFfiles/lipspeaker_labelfiles.mlf',os.path.expanduser("~/TCDTIMIT/extracted"), 4) #storeDir requires TCDTIMIT in the name
+processDatabase('./MLFfiles/lipspeaker_labelfiles.mlf',os.path.expanduser("~/TCDTIMIT/lipreading/processed"), 4) #storeDir requires TCDTIMIT in the name
 # processDatabase('/home/user/TCDTIMIT_test/test.mlf',os.path.expanduser("~/TCDTIMIT_test/processed"), 4) #storeDir requires TCDTIMIT in the name
 
 duration = time.clock() - startTime

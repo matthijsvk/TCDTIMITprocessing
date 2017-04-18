@@ -194,27 +194,26 @@ def processVideoPhonemes(videoPhonemeList, timeModifier=0.5):
 
 
 # get valid times, phonemes, frame numbers
-def getValid (phonemes, framerate):  # frameRate = 29.97 for the TCDTimit database
+def getValid(time_phonemes, framerate):  # frameRate = 29.97 for the TCDTimit database
     import math
     # take care of duplicates: loop through the phonemes, if two are same frame, only keep the first one
-    seenFrames = set()
-    doubleFrames = set()
+    seen_framePhonemes = set()
     validFrames = []
     validPhonemes = []
     validTimes = []
-    for phoneme in phonemes:
-        time = float(phoneme[0])
-        frame = int(math.floor(time * framerate))
-        if frame not in seenFrames:
-            validPhonemes.append(phoneme[1])
+    for time_phoneme in time_phonemes:
+        time = float(time_phoneme[0])
+        frame = int(np.round(time * framerate))
+        phoneme = time_phoneme[1]
+        if (frame, phoneme) not in seen_framePhonemes:
+            validPhonemes.append(time_phoneme[1])
             validTimes.append(time)
             validFrames.append(frame)
-            seenFrames.add(frame)
+            seen_framePhonemes.add(frame)
         else:
-            print("frame ", frame, " already seen")
-            doubleFrames.add(frame)
-    # print(validFrames)
-    # print(doubleFrames)
+            print("frame_phoneme ", (frame, phoneme), " already seen")
+    try:assert len(validFrames) == len(time_phonemes)
+    except: import pdb;pdb.set_trace()
     return validTimes, validFrames, validPhonemes
 
 
@@ -222,7 +221,9 @@ def getValid (phonemes, framerate):  # frameRate = 29.97 for the TCDTimit databa
 def writePhonemesToFile (videoName, speakerName, phonemes, targetDir):
     validTimes, validFrames, validPhonemes = getValid(phonemes, 29.97)
     phonemeFile = ''.join([targetDir, os.sep, speakerName, "_", videoName, "_PHN.txt"])
-    
+    if os.path.exists(phonemeFile): print("phoneme file exists."); return 0
+    if not os.path.exists(targetDir): os.makedirs(targetDir)
+
     # add 1 to the validFrames to fix the ffmpeg issue (starts at 1 instead of 0)
     for i in range(0, len(validFrames)):
         validFrames[i] += 1
@@ -255,6 +256,13 @@ def fixStoreDirName (storageLocation, videoName, pathLine):
     storeDir = storeDir.replace('.rec', '.mp4')
     if not "TCDTIMIT/" in storeDir: raise Exception("You have to create a 'TCDTIMIT' top level directory!!"); sys.exit(-1)
     oldStoragePath, relPath = storeDir.split("TCDTIMIT/")  # /home/data/TCDTIMIT/volunteers/...
+    # make sure we're at the volunteers/lipspeakers top dir
+    # keep going down until you get to 'lipspeakers' or 'volunteers'
+    relTopDir = relPath.split('/')[0]
+    while not (relTopDir == 'lipspeakers' or relTopDir == 'volunteers'):
+        relPath = '/'.join(relPath.split('/')[1:] )
+        relTopDir = relPath.split('/')[0]
+
     storeDir = ''.join([storageLocation, os.sep, relPath])
     storeDir, second = storeDir.split("Clips")
     if storeDir.endswith('/'):
@@ -323,17 +331,17 @@ def extractAllFrames (videoPath, videoName, storeDir, framerate, targetSize, cro
         # actually run the command, only show stderror on terminal, close the processes (don't wait for user input)
         FNULL = open(os.devnull, 'w')
         p = subprocess.Popen(command, stdout=FNULL, stderr=subprocess.STDOUT, close_fds=True)  # stdout=subprocess.PIPE
+        subprocess.Popen.wait(p)
         return 1
     
-    else:
+    else: #assume already done
         return 0
 
 
 # detect faces in all jpg's in sourceDir
 # extract faces to "storeDir/faces", and mouths to "storeDir/mouths"
-def extractFacesMouths (sourceDir, storeDir, predictor_path):
-    if not os.path.exists(predictor_path):
-        print('Landmark predictor not found!')
+def extractFacesMouths (sourceDir, storeDir, detector, predictor):
+
         # sys.exit(1)
     storeFaceDir = storeDir + os.sep + "faces"
     if not os.path.exists(storeFaceDir):
@@ -342,9 +350,6 @@ def extractFacesMouths (sourceDir, storeDir, predictor_path):
     storeMouthsDir = storeDir + os.sep + "mouths"
     if not os.path.exists(storeMouthsDir):
         os.makedirs(storeMouthsDir)
-    
-    detector = dlib.get_frontal_face_detector()
-    predictor = dlib.shape_predictor(predictor_path)
     
     for f in glob.glob(os.path.join(sourceDir, "*.jpg")):
         dets = []
@@ -356,7 +361,7 @@ def extractFacesMouths (sourceDir, storeDir, predictor_path):
                 mouthPath = storeMouthsDir + os.sep + fname + "_mouth.jpg"
                 
                 if os.path.exists(facePath):
-                    print(facePath, " already exists")
+                    #cd /home/matthijs/Documents/Dropbox/_MyDocs/_ku_leuven/Master_2/Thesis/TCDTIMITprocessingprint(facePath, " already exists")
                     continue
                 
                 img = io.imread(f,as_grey=True)
