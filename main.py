@@ -9,8 +9,9 @@ from processDatabase import *
 ###################################################################################################
 startTime = time.clock()
 
-processDatabase('./MLFfiles/lipspeaker_labelfiles.mlf',os.path.expanduser("~/TCDTIMIT/lipreading/processed"), 4) #storeDir requires TCDTIMIT in the name
-# processDatabase('/home/user/TCDTIMIT_test/test.mlf',os.path.expanduser("~/TCDTIMIT_test/processed"), 4) #storeDir requires TCDTIMIT in the name
+nbThreads = 8
+processDatabase('./MLFfiles/lipspeaker_labelfiles.mlf',os.path.expanduser("~/TCDTIMIT/lipreading/processed"), nbThreads) #storeDir requires TCDTIMIT in the name
+processDatabase('./MLFfiles/volunteer_labelfiles.mlf', os.path.expanduser("~/TCDTIMIT/lipreading/processed"), nbThreads)
 
 duration = time.clock() - startTime
 print("This took ", duration, " seconds")

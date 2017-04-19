@@ -49,7 +49,17 @@ def processDatabase (MLFfile, storageLocation, nbThreads=2):
             else:
                 currentVideos = videos[batchIndex:batchIndex + batchSize]
             batchStartTime = time.clock()
-            
+
+            # 0. filter unused videos
+            usedVideos = []
+            unused = ["55F", "56M", "57M", "58F", "59F"]
+            for i in range(len(currentVideos)):
+                videoPath, phonemes = processVideoFile(currentVideos[i])
+                if os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(videoPath)))) in unused:
+                    continue
+                else: usedVideos.append(currentVideos[i])
+            currentVideos = usedVideos
+
             # 1. extract the frames
             tick = time.clock()
 
@@ -81,6 +91,8 @@ def processDatabase (MLFfile, storageLocation, nbThreads=2):
             print("\tAll frames extracted.")
             print("duration: ", time.clock() - tick)
             print("----------------------------------")
+
+            # get index of last extracted frame, as a check
             
             # if query_yes_no("stop?", "yes"): break
             

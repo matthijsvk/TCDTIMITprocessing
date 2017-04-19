@@ -274,7 +274,8 @@ def fixStoreDirName (storageLocation, videoName, pathLine):
 
 
 # delete unneeded files,  based on a phoneme file
-def deleteUnneededFiles (videoDir):
+def deleteUnneededFiles(videoDir):
+    print("deleting files...")
     # read correct frames: firs column of text file
     parentName = os.path.basename(os.path.dirname(videoDir))
     dirName = os.path.basename(videoDir)
@@ -284,30 +285,21 @@ def deleteUnneededFiles (videoDir):
             parts = line.split()  # split line into parts
             if len(parts) > 1:  # if at least 2 parts/columns
                 validFrames.append(parts[0])  # print column 2
-    
+
     # walk through the files, if a file doesn't contain '_validFrame', then remove it.
     nbRemoved = 0
     for root, dirs, files in os.walk(videoDir):
         files.sort(key=tryint)
         for f in files:
-            for validFrame in validFrames:
-                remove = 1
-                # only jpg
-                name, ext = os.path.splitext(f)
-                if ext != ".jpg": remove = 0; continue
-                # must contain some validFrame
-                fname = os.path.splitext(f)[0]
-                fnumber = fname.split("_")[1]
-                if validFrame == fnumber:
-                    # print(f + " has frame number: ", fnumber, " and won't be removed")
-                    remove = 0
-                    break
-            if remove == 1:
-                filePath = os.path.join(root, f)
-                # print(filePath + " will be removed")
+            name, ext = os.path.splitext(f)
+            filePath = os.path.join(root, f)
+            if ext != ".jpg": remove = 0; continue
+            fname = os.path.splitext(f)[0]
+            fnumber = fname.split("_")[1]
+            if fnumber not in validFrames:
                 os.remove(filePath)
                 nbRemoved += 1
-    # print(validFrames)
+
     return nbRemoved
 
 
@@ -369,7 +361,7 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor):
 
                 # detect face, then keypoints. Store face and mouth
                 # resize with factor 4 to increase detection speed
-                resizer = 4
+                resizer = 16
                 dim =(int(width / resizer), int(height / resizer))
                 imgSmall = resize(img, dim)
                 imgSmall = img_as_ubyte(imgSmall)
@@ -377,23 +369,32 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor):
                 dets = detector(imgSmall, 1)  # detect face
                 if len(dets) == 0:
                     # print("looking on full-res image...")
-                    resizer = 1
+                    resizer = 4
                     dim = (int(width / resizer), int(height / resizer))
                     imgSmall = resize(img, dim)
                     imgSmall = img_as_ubyte(imgSmall)
                     
                     dets = detector(imgSmall, 1)
+
                     if len(dets) == 0:
-                        print("still no faces found. Using previous face coordinates...")
-                        if 'top' in locals(): #could be issue if no face in first image ? #TODO
-                            face_img = img[top:bot, left:right]
-                            io.imsave(facePath, face_img)
-                            mouth_img = img[my:my + mh, mx:mx + mw]
-                            io.imsave(mouthPath, mouth_img)
+                        # print("looking on full-res image...")
+                        resizer = 1
+                        dim = (int(width / resizer), int(height / resizer))
+                        imgVerySmall = resize(img, dim)
+                        imgVerySmall = img_as_ubyte(imgVerySmall)
+
+                        dets = detector(imgVerySmall, 1)
+                        if len(dets) == 0:
+                            print("still no faces found. Using previous face coordinates...")
+                            if 'top' in locals(): #could be issue if no face in first image ? #TODO
+                                face_img = img[top:bot, left:right]
+                                io.imsave(facePath, face_img)
+                                mouth_img = img[my:my + mh, mx:mx + mw]
+                                io.imsave(mouthPath, mouth_img)
+                                continue
+                            else:
+                                print("top not in locals. ERROR")
                             continue
-                        else:
-                            print("top not in locals. ERROR")
-                        continue
                 
                 d = dets[0]
                 # extract face, store in storeFacesDir
