@@ -66,16 +66,17 @@ def writePhonemesToFile2(videoName, speakerName, phonemes, targetDir):
         validFrames[i] += 1
         if validFrames[i] <1: validFrames[i]=1
 
-    pdb.set_trace()
-
     # check that no frames are larger than last frame extracted by extractAllFrames
     highest = 1
     for root, dirs, files in os.walk(targetDir):
         for file in files:
+            print(file)
             name, ext = os.path.splitext(file)
             if not ext ==".jpg": continue
             frame = int(name.split("_")[1])
             if frame > highest: highest = frame
+
+    pdb.set_trace()
 
     for i in range(len(validFrames)):
         if validFrames[i] > highest:
@@ -129,6 +130,7 @@ def deleteUnneededFiles(videoDir):
     return nbRemoved
 
 
+
 detector = dlib.get_frontal_face_detector()
 predictor_path = "./shape_predictor_68_face_landmarks.dat"
 if not os.path.exists(predictor_path):
@@ -142,8 +144,10 @@ if not os.path.exists(storageLocation): os.makedirs(storageLocation)
 video1 = readMLFfile('/home/matthijs/Desktop/si2246.phn')[0]
 video2 = readMLFfile('/home/matthijs/Desktop/sx180.phn')[0]
 video3 = readMLFfile('/home/matthijs/Desktop/sx343.phn')[0]
+video4 = readMLFfile('/home/matthijs/Desktop/si512.phn')[0]
+video5 = readMLFfile('/home/matthijs/Desktop/si549.phn')[0]
 
-videos = [video1]#,video2,video3]
+videos = [video5]#,video2,video3]
 
 for video in videos:
     videoPath, phonemes = processVideoFile(video)
@@ -157,7 +161,6 @@ for video in videos:
     videoName = os.path.splitext(os.path.basename(videoPath))[0]
     storeDir = fixStoreDirName(storageLocation, videoName, video[0])
     print("Extracting phonemes from ", videoPath, ", saving to: \t", storeDir)
-
 
     framerate = 29.97
     extractAllFrames(videoPath, videoName, storeDir, framerate, '1200:1000', '350:0')

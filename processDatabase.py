@@ -25,6 +25,9 @@ def processDatabase (MLFfile, storageLocation, nbThreads=2):
     framerate = 29.97
     batchSize = nbThreads  # number of videos per iteration
 
+    saveFaces = True
+    saveMouths = True
+
     detector = dlib.get_frontal_face_detector()
     predictor_path = "./shape_predictor_68_face_landmarks.dat"
     if not os.path.exists(predictor_path):
@@ -34,14 +37,17 @@ def processDatabase (MLFfile, storageLocation, nbThreads=2):
     print("This program will process all video files specified in {mlf}. It will store the extracted faces and mouths in {storageLocation}. \n \
             The process might take a while (for the lipspeaker files ~3h, for the volunteer files ~10h)".format(
         mlf=MLFfile, storageLocation=storageLocation))
-    if query_yes_no("Are you sure this is correct?", "no"):
+
+
+    if True: #query_yes_no("Are you sure this is correct?", "no"):
         
         batchIndex = 0
         running = 1
         # multithread the operations
         executor = concurrent.futures.ThreadPoolExecutor(nbThreads)
         
-        while running:
+        # while running:
+        for batchIndex in tqdm(range(0,len(videos), batchSize)):
             if batchIndex + batchSize >= len(videos):
                 print("Processing LAST BATCH of videos...")
                 running = 0
@@ -146,27 +152,27 @@ def processDatabase (MLFfile, storageLocation, nbThreads=2):
                 storeDir = sourceDir
                 print("Extracting faces from ", sourceDir)
                 # exectute. The third argument is the path to the dlib facial landmark predictor
-                futures.append(executor.submit(extractFacesMouths, sourceDir, storeDir, detector, predictor))
+                futures.append(executor.submit(extractFacesMouths, sourceDir, storeDir, detector, predictor, saveFaces, saveMouths))
             concurrent.futures.wait(futures)
             print("\tAll faces and mouths have been extracted.")
             print("duration: ", time.clock() - tick)
             print("----------------------------------")
             
-            # 4. convert to grayscale
-            tick = time.clock()
-            futures = []
-            for video in currentVideos:
-                videoPath, phonemes = processVideoFile(video)
-                videoName = os.path.splitext(os.path.basename(videoPath))[0]
-                sourceDir = fixStoreDirName(storageLocation, videoName, video[0])
-                storeDir = sourceDir
-                dirNames = ["faces", "mouths"]
-                print("Converting to grayscale from: ", sourceDir)
-                futures.append(executor.submit(convertToGrayScale, sourceDir, dirNames))
-            concurrent.futures.wait(futures)
-            print("\tAll faces and mouths have been converted to grayscale.")
-            print("duration: ", time.clock() - tick)
-            print("----------------------------------")
+            # 4. convert to grayscale -> already converted to Gray in exctactFacesMouths
+            # tick = time.clock()
+            # futures = []
+            # for video in currentVideos:
+            #     videoPath, phonemes = processVideoFile(video)
+            #     videoName = os.path.splitext(os.path.basename(videoPath))[0]
+            #     sourceDir = fixStoreDirName(storageLocation, videoName, video[0])
+            #     storeDir = sourceDir
+            #     dirNames = ["faces", "mouths"]
+            #     print("Converting to grayscale from: ", sourceDir)
+            #     futures.append(executor.submit(convertToGrayScale, sourceDir, dirNames))
+            # concurrent.futures.wait(futures)
+            # print("\tAll faces and mouths have been converted to grayscale.")
+            # print("duration: ", time.clock() - tick)
+            # print("----------------------------------")
             
             # 5. resize mouth images, for convnet usage
             tick = time.clock()
@@ -177,7 +183,9 @@ def processDatabase (MLFfile, storageLocation, nbThreads=2):
                 # storeDir: eg /home/data/TCDTIMIT/processed/lipspeakers/LipSpkr1/sa1
                 storeDir = fixStoreDirName(storageLocation, videoName, video[0])
                 rootDir = storeDir
-                dirNames = ["mouths_gray", "faces_gray"]
+                dirNames = []
+                if saveMouths: dirNames .append("mouths")
+                if saveFaces: dirNames.append("faces")      #dirNames = ["mouths_gray", "faces_gray"]
                 print("Resizing images from: ", sourceDir)
                 futures.append(executor.submit(resizeImages, storeDir, dirNames, False, 120.0))
             concurrent.futures.wait(futures)

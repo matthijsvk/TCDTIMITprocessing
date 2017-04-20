@@ -20,6 +20,9 @@ from skimage.transform import resize
 from skimage.color import rgb2gray
 from skimage import img_as_ubyte
 
+from fixTCDTIMITwavStructure import *
+from getPhnFiles import *
+
 ########### Small helpfunctions ###########
 
 ## http://stackoverflow.com/questions/3041986/apt-command-line-interface-like-yes-no-input#3041990
@@ -203,7 +206,7 @@ def getValid(time_phonemes, framerate):  # frameRate = 29.97 for the TCDTimit da
     validTimes = []
     for time_phoneme in time_phonemes:
         time = float(time_phoneme[0])
-        frame = int(np.round(time * framerate))
+        frame = int(math.floor(time * framerate))
         phoneme = time_phoneme[1]
         if (frame, phoneme) not in seen_framePhonemes:
             validPhonemes.append(time_phoneme[1])
@@ -212,22 +215,37 @@ def getValid(time_phonemes, framerate):  # frameRate = 29.97 for the TCDTimit da
             seen_framePhonemes.add(frame)
         else:
             print("frame_phoneme ", (frame, phoneme), " already seen")
-    try:assert len(validFrames) == len(time_phonemes)
-    except: import pdb;pdb.set_trace()
     return validTimes, validFrames, validPhonemes
 
 
 # write file with phonemes and corresponding frame numbers. First column = frames. Second column = corresponding phonemes
-def writePhonemesToFile (videoName, speakerName, phonemes, targetDir):
+def writePhonemesToFile(videoName, speakerName, phonemes, targetDir):
     validTimes, validFrames, validPhonemes = getValid(phonemes, 29.97)
     phonemeFile = ''.join([targetDir, os.sep, speakerName, "_", videoName, "_PHN.txt"])
-    if os.path.exists(phonemeFile): print("phoneme file exists."); return 0
     if not os.path.exists(targetDir): os.makedirs(targetDir)
 
     # add 1 to the validFrames to fix the ffmpeg issue (starts at 1 instead of 0)
     for i in range(0, len(validFrames)):
         validFrames[i] += 1
-    
+        if validFrames[i] < 1: validFrames[i] = 1
+
+    # check that no frames are larger than last frame extracted by extractAllFrames
+    highest = 1
+    for root, dirs, files in os.walk(targetDir):
+        for file in files:
+            #print(file)
+            name, ext = os.path.splitext(file)
+            if not ext == ".jpg": continue
+            frame = int(name.split("_")[1])
+            if frame > highest: highest = frame
+
+
+    for i in range(len(validFrames)):
+        if validFrames[i] > highest:
+            #print("FOUND HIGHER THAN HIGHEST:", validFrames[i])
+            validFrames[i] = highest
+
+
     # write to text file
     thefile = open(phonemeFile, 'w')
     for i in range(len(validFrames) - 1):
@@ -236,11 +254,11 @@ def writePhonemesToFile (videoName, speakerName, phonemes, targetDir):
     item = (validFrames[-1], validPhonemes[-1])
     thefile.write(' '.join(map(str, item)))
     thefile.close()
-    
+
     # also write a mat file
     matPath = targetDir + os.sep + "phonemeFrames.mat"
     sio.savemat(matPath, {'validFrames': np.array(validFrames), 'validPhonemes': np.array(validPhonemes)})
-    
+
     return 0
 
 # used to keep folder structure, but under different root path
@@ -273,7 +291,6 @@ def fixStoreDirName (storageLocation, videoName, pathLine):
     return storeDir
 
 
-# delete unneeded files,  based on a phoneme file
 def deleteUnneededFiles(videoDir):
     print("deleting files...")
     # read correct frames: firs column of text file
@@ -286,6 +303,8 @@ def deleteUnneededFiles(videoDir):
             if len(parts) > 1:  # if at least 2 parts/columns
                 validFrames.append(parts[0])  # print column 2
 
+    # import pdb;
+    # pdb.set_trace()
     # walk through the files, if a file doesn't contain '_validFrame', then remove it.
     nbRemoved = 0
     for root, dirs, files in os.walk(videoDir):
@@ -332,7 +351,10 @@ def extractAllFrames (videoPath, videoName, storeDir, framerate, targetSize, cro
 
 # detect faces in all jpg's in sourceDir
 # extract faces to "storeDir/faces", and mouths to "storeDir/mouths"
-def extractFacesMouths (sourceDir, storeDir, detector, predictor):
+
+from PIL import Image
+import scipy.misc
+def extractFacesMouths (sourceDir, storeDir, detector, predictor, saveFaces = True, saveMouths = True):
 
         # sys.exit(1)
     storeFaceDir = storeDir + os.sep + "faces"
@@ -342,8 +364,9 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor):
     storeMouthsDir = storeDir + os.sep + "mouths"
     if not os.path.exists(storeMouthsDir):
         os.makedirs(storeMouthsDir)
-    
+
     for f in glob.glob(os.path.join(sourceDir, "*.jpg")):
+
         dets = []
         fname, ext = os.path.splitext(os.path.basename(f))
         if ext == ".jpg":
@@ -353,92 +376,94 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor):
                 mouthPath = storeMouthsDir + os.sep + fname + "_mouth.jpg"
                 
                 if os.path.exists(facePath):
-                    #cd /home/matthijs/Documents/Dropbox/_MyDocs/_ku_leuven/Master_2/Thesis/TCDTIMITprocessingprint(facePath, " already exists")
+                    #print(facePath, " already exists")
                     continue
-                
-                img = io.imread(f,as_grey=True)
-                width, height = img.shape[:2]
+
+                img = scipy.misc.imread(f, 'L').astype('uint8')
+                width, height = img.shape
 
                 # detect face, then keypoints. Store face and mouth
                 # resize with factor 4 to increase detection speed
                 resizer = 16
                 dim =(int(width / resizer), int(height / resizer))
-                imgSmall = resize(img, dim)
-                imgSmall = img_as_ubyte(imgSmall)
+                imgSmall = scipy.misc.imresize(img, dim)
 
                 dets = detector(imgSmall, 1)  # detect face
                 if len(dets) == 0:
-                    # print("looking on full-res image...")
+                    print("looking on 1/4 image...")
                     resizer = 4
+                    resizer = 16
                     dim = (int(width / resizer), int(height / resizer))
-                    imgSmall = resize(img, dim)
-                    imgSmall = img_as_ubyte(imgSmall)
-                    
+                    imgSmall = scipy.misc.imresize(img, dim)
+
                     dets = detector(imgSmall, 1)
 
                     if len(dets) == 0:
-                        # print("looking on full-res image...")
+                        print("looking on full-res image...")
                         resizer = 1
+                        resizer = 16
                         dim = (int(width / resizer), int(height / resizer))
-                        imgVerySmall = resize(img, dim)
-                        imgVerySmall = img_as_ubyte(imgVerySmall)
+                        imgSmall = scipy.misc.imresize(img, dim)
 
-                        dets = detector(imgVerySmall, 1)
+                        dets = detector(imgSmall, 1)
                         if len(dets) == 0:
                             print("still no faces found. Using previous face coordinates...")
                             if 'top' in locals(): #could be issue if no face in first image ? #TODO
                                 face_img = img[top:bot, left:right]
-                                io.imsave(facePath, face_img)
+                                if saveFaces: scipy.misc.imsave(facePath, face_img)  # save face image
                                 mouth_img = img[my:my + mh, mx:mx + mw]
-                                io.imsave(mouthPath, mouth_img)
+                                if saveMouths: scipy.misc.imsave(mouthPath, mouth_img)
                                 continue
                             else:
                                 print("top not in locals. ERROR")
                             continue
-                
+
                 d = dets[0]
-                # extract face, store in storeFacesDir
-                left = d.left() * resizer
-                right = d.right() * resizer
-                top = d.top() * resizer
-                bot = d.bottom() * resizer
-                # go no further than img borders
-                if (left < 0):      left = 0
-                if (right > width): right = width
-                if (top < 0):       top = 0
-                if (bot > height):  bot = height
-                face_img = img[top:bot, left:right]
-                io.imsave(facePath, face_img)  # save face image
-                
-                # now detect mouth landmarks
-                # detect 68 keypoints, see dlibLandmarks.png
-                shape = predictor(imgSmall, d)
-                # Get the mouth landmarks.
-                mx = shape.part(48).x * resizer
-                mw = shape.part(54).x * resizer - mx
-                my = shape.part(31).y * resizer
-                mh = shape.part(57).y * resizer - my
-                # go no further than img borders
-                if (mx < 0):       mx = 0
-                if (mw > width):   mw = width
-                if (my < 0):       my = 0
-                if (mh > height):  mh = height
-                
-                # scale them to get a better image of the mouth
-                widthScalar = 1.5
-                heightScalar = 1
-                mx = int(mx - (widthScalar - 1) / 2.0 * mw)
-                # my = int(my - (heightScalar - 1)/2.0*mh) #not needed, we already have enough nose
-                mw = int(mw * widthScalar)
-                mh = int(mh * widthScalar)
-                
-                mouth_img = img[my:my + mh, mx:mx + mw]
-                io.imsave(mouthPath, mouth_img)
+                if saveFaces:
+                    # extract face, store in storeFacesDir
+                    left = d.left() * resizer
+                    right = d.right() * resizer
+                    top = d.top() * resizer
+                    bot = d.bottom() * resizer
+                    # go no further than img borders
+                    if (left < 0):      left = 0
+                    if (right > width): right = width
+                    if (top < 0):       top = 0
+                    if (bot > height):  bot = height
+                    face_img = img[top:bot, left:right] #img.crop((left,top,right,bot))#
+                    scipy.misc.imsave(facePath, face_img)  # save face image
+
+                if saveMouths:# now detect mouth landmarks
+                    # detect 68 keypoints, see dlibLandmarks.png
+                    shape = predictor(imgSmall, d)
+                    # Get the mouth landmarks.
+                    mx = shape.part(48).x * resizer
+                    mw = shape.part(54).x * resizer - mx
+                    my = shape.part(31).y * resizer
+                    mh = shape.part(57).y * resizer - my
+                    # go no further than img borders
+                    if (mx < 0):       mx = 0
+                    if (mw > width):   mw = width
+                    if (my < 0):       my = 0
+                    if (mh > height):  mh = height
+
+                    # scale them to get a better image of the mouth
+                    # default : width 1.5, height 1
+                    widthScalar = 1.25
+                    heightScalar = 0.85
+                    mx = int(mx - (widthScalar - 1) / 2.0 * mw)
+                    # my = int(my - (heightScalar - 1)/2.0*mh) #not needed, we already have enough nose
+                    mw = int(mw * widthScalar)
+                    mh = int(mh * widthScalar)
+
+                    mouth_img = img[my:my + mh, mx:mx + mw] #img.crop((mx,my,mx+mw,my+mh))
+                    scipy.misc.imsave(mouthPath, mouth_img)
+
             except:
                 print("Unexpected error:", sys.exc_info()[0])
                 print(traceback.format_exc())
                 raise
-            
+
 
 def resize_image (filePath, filePathResized, keepAR=True, width=120.0):
     im = io.imread(filePath)
