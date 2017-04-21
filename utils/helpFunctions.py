@@ -379,6 +379,7 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor, saveFaces = Tr
                     #print(facePath, " already exists")
                     continue
 
+                # load the image, as grayscale and uint8
                 img = scipy.misc.imread(f, 'L').astype('uint8')
                 width, height = img.shape
 
@@ -392,7 +393,6 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor, saveFaces = Tr
                 if len(dets) == 0:
                     print("looking on 1/4 image...")
                     resizer = 4
-                    resizer = 16
                     dim = (int(width / resizer), int(height / resizer))
                     imgSmall = scipy.misc.imresize(img, dim)
 
@@ -401,21 +401,28 @@ def extractFacesMouths (sourceDir, storeDir, detector, predictor, saveFaces = Tr
                     if len(dets) == 0:
                         print("looking on full-res image...")
                         resizer = 1
-                        resizer = 16
                         dim = (int(width / resizer), int(height / resizer))
                         imgSmall = scipy.misc.imresize(img, dim)
 
                         dets = detector(imgSmall, 1)
                         if len(dets) == 0:
                             print("still no faces found. Using previous face coordinates...")
-                            if 'top' in locals(): #could be issue if no face in first image ? #TODO
+                            # if 'top' in locals(): #could be issue if no face in first image ? #TODO
+                            try:
                                 face_img = img[top:bot, left:right]
-                                if saveFaces: scipy.misc.imsave(facePath, face_img)  # save face image
                                 mouth_img = img[my:my + mh, mx:mx + mw]
-                                if saveMouths: scipy.misc.imsave(mouthPath, mouth_img)
-                                continue
-                            else:
-                                print("top not in locals. ERROR")
+
+                            except: # vars not yet defined b/c this is the first image -> use some manual default values
+                                top= int(height*0.2); bot=int(height*0.9)
+                                left = int(width*0.2); right = int(width*0.8)
+                                face_img = img[top:bot, left:right]
+
+                                my = int(height * 0.6);   mh = int(height * 0.3)
+                                mx = int(width * 0.2);    mw = int(width * 0.5)
+                                mouth_img = img[my:my + mh, mx:mx + mw]
+
+                            if saveFaces: scipy.misc.imsave(facePath, face_img)  # save face image
+                            if saveMouths: scipy.misc.imsave(mouthPath, mouth_img)
                             continue
 
                 d = dets[0]

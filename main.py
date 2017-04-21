@@ -1,4 +1,4 @@
-from processDatabase import *
+from processDatabase_v2 import *
 
 # get phone list from file, extract phonemes and times, get the frames corresponding to those phonemes
 # then remove frames without phonemes, extract faces, extract mouths, convert them to grayscale images
@@ -9,11 +9,13 @@ from processDatabase import *
 ###################################################################################################
 startTime = time.clock()
 
-nbThreads = 8
+nbThreads = 20
 processDatabase('./MLFfiles/lipspeaker_labelfiles.mlf',os.path.expanduser("~/TCDTIMIT/lipreading/processed"), nbThreads) #storeDir requires TCDTIMIT in the name
 processDatabase('./MLFfiles/volunteer_labelfiles.mlf', os.path.expanduser("~/TCDTIMIT/lipreading/processed"), nbThreads)
 
-#processDatabase('/home/matthijs/Desktop/Lipspkr1_short.mlf', os.path.expanduser("~/TCDTIMIT/lipreading/processed3"), nbThreads)  # storeDir requires TCDTIMIT in the name
+# processDatabase('./MLFfiles/lipspeaker2_test.mlf', os.path.expanduser("~/TCDTIMIT/lipreading/processedTEST3"),
+#                 nbThreads)  # storeDir requires TCDTIMIT in the name
+
 
 duration = time.clock() - startTime
 print("This took ", duration, " seconds")
