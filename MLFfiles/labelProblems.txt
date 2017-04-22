@@ -1,0 +1,6 @@
+['/home/matthijs/TCDTIMIT/combinedSR/TCDTIMIT/database/volunteers/28M/sx337' ->  2x 'd' after each other
+'/home/matthijs/TCDTIMIT/combinedSR/TCDTIMIT/database/volunteers/27M/si948', ->  2x 't' after each other
+'/home/matthijs/TCDTIMIT/combinedSR/TCDTIMIT/database/volunteers/08F/si546', ->  2x 'd' after each other
+'/home/matthijs/TCDTIMIT/combinedSR/TCDTIMIT/database/volunteers/10M/sx121', ->  2x 't' after each other
+'/home/matthijs/TCDTIMIT/combinedSR/TCDTIMIT/database/volunteers/35M/si1259',
+'/home/matthijs/TCDTIMIT/combinedSR/TCDTIMIT/database/volunteers/29M/si1424']

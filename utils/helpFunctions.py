@@ -292,7 +292,7 @@ def fixStoreDirName (storageLocation, videoName, pathLine):
 
 
 def deleteUnneededFiles(videoDir):
-    print("deleting files...")
+    #print("deleting files...")
     # read correct frames: firs column of text file
     parentName = os.path.basename(os.path.dirname(videoDir))
     dirName = os.path.basename(videoDir)

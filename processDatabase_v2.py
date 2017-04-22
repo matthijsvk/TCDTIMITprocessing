@@ -43,8 +43,8 @@ def processDatabase(MLFfile, storageLocation, nbThreads=2):
         executor = concurrent.futures.ThreadPoolExecutor(nbThreads)
         badVideos = []
 
-        for video in tqdm(videos,total=len(videos)):
-            executor.submit(processVideo, badVideos, detector, framerate, predictor, saveFaces, saveMouths, storageLocation, video)
+        for video in videos:
+            executor.submit(processVideo, badVideos, detector, framerate, predictor, saveFaces, saveMouths, storageLocation, video, verbose=False)
 
         print("All done.")
         executor.shutdown(wait=True)
@@ -53,7 +53,7 @@ def processDatabase(MLFfile, storageLocation, nbThreads=2):
     return 0
 
 
-def processVideo(badVideos, detector, framerate, predictor, saveFaces, saveMouths, storageLocation, video):
+def processVideo(badVideos, detector, framerate, predictor, saveFaces, saveMouths, storageLocation, video, verbose=True):
     videoStartTime = time.clock()
     # 0. filter unused videos
     unused = ["55F", "56M", "57M", "58F", "59F"]
@@ -72,55 +72,60 @@ def processVideo(badVideos, detector, framerate, predictor, saveFaces, saveMouth
 
     # 1. extract the frames
     tick = time.clock()
-    print("Extracting frames from ", videoPath, ", saving to: \t", storeDir)
+    if verbose: print("Extracting frames from ", videoPath, ", saving to: \t", storeDir)
     extractAllFrames(videoPath, videoName, storeDir, framerate, '1200:1000', '350:0')
-    print("\tAll frames extracted.")
-    print("duration: ", time.clock() - tick)
-    print("----------------------------------")
+    if verbose:
+        print("\tAll frames extracted.")
+        print("duration: ", time.clock() - tick)
+        print("----------------------------------")
 
     # 2. extract the phonemes
     tick = time.clock()
-    print("Extracting phonemes from ", videoPath, ", saving to: \t", storeDir)
+    if verbose: print("Extracting phonemes from ", videoPath, ", saving to: \t", storeDir)
     # write phonemes and frame numbers to file
     writePhonemesToFile(videoName, speakerName, phonemes, storeDir)
-    print("phonemes have been written")
-    print("duration: ", time.clock() - tick)
-    print("-----------------------------")
+    if verbose:
+        print("phonemes have been written")
+        print("duration: ", time.clock() - tick)
+        print("-----------------------------")
 
     # 2. remove unneccessary frames
     tick = time.clock()
     videoName = os.path.splitext(os.path.basename(videoPath))[0]
-    print("removing invalid frames from ", storeDir)
+    if verbose: print("removing invalid frames from ", storeDir)
     nbRemoved = deleteUnneededFiles(storeDir)
-    print("there were ", nbRemoved, "frames removed")
-    print("\tAll unnecessary frames removed.")
-    print("duration: ", time.clock() - tick)
-    print("----------------------------------")
+    if verbose:
+        print("there were ", nbRemoved, "frames removed")
+        print("\tAll unnecessary frames removed.")
+        print("duration: ", time.clock() - tick)
+        print("----------------------------------")
     sleepTime = nbRemoved * 0.015
     time.sleep(sleepTime)
 
     # 3. extract faces and mouths
     tick = time.clock()
     sourceDir = storeDir
-    print("Extracting faces from ", sourceDir)
+    if verbose: print("Extracting faces from ", sourceDir)
     extractFacesMouths(sourceDir, storeDir, detector, predictor, saveFaces, saveMouths)
-    print("\tAll faces and mouths have been extracted.")
-    print("duration: ", time.clock() - tick)
-    print("----------------------------------")
+    if verbose:
+        print("\tAll faces and mouths have been extracted.")
+        print("duration: ", time.clock() - tick)
+        print("----------------------------------")
 
     # 4. resize mouth images, for convnet usage: 120x120
     tick = time.clock()
     dirNames = []
     if saveMouths: dirNames.append("mouths")
     if saveFaces: dirNames.append("faces")  # dirNames = ["mouths_gray", "faces_gray"]
-    print("Resizing images from: ", sourceDir)
+    if verbose: print("Resizing images from: ", sourceDir)
     resizeImages(storeDir, dirNames, False, 120.0)
-    print("\tAll mouths have been resized.")
-    print("duration: ", time.clock() - tick)
-    print("----------------------------------")
+    if verbose:
+        print("\tAll mouths have been resized.")
+        print("duration: ", time.clock() - tick)
+        print("----------------------------------")
     videoDuration = time.clock() - videoStartTime
-    print("#####################################")
+
     print("\t Video ", videoName, " Done!     duration: ", videoDuration)
-    print("#####################################")
+    if verbose: print("#####################################")
 
     return None

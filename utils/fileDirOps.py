@@ -332,7 +332,7 @@ if __name__ == "__main__":
     
     # 1. copy mouths_gray_120 images and PHN.txt files to targetRoot. Move files up from their mouths_gray_120 dir to the video dir (eg sa1)
     print("Copying mouth_gray_120 directories to database location...")
-    copyDBFiles(processedDir, ["mouths_gray_120"], databaseDir)
+    copyDBFiles(processedDir, ["mouths_120"], databaseDir)
     print("-----------------------------------------")
     
     # 2. extract phonemes for each image, put them in the image name
