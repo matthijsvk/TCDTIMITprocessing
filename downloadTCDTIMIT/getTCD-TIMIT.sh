@@ -25,37 +25,37 @@ echo "##########################################################################
 mkdir -p lipspeakers
 mkdir -p volunteers
 
+filename="$1"
+while read -ra line
+	do
+	for i in "${line[@]}"; do
+		if [[ $i =~ .*https* ]]; then  # for the URL, you should be cd'ed into the right place. Now download the file.
+			echo "URL: $i"
+			if [[ -f "straightcam.zip" ]] || [[ -d "straightcam" ]]; then
+				echo "File exists. Skipping..."
+			else
+				echo "File does not exist yet. Downloading..."
+				# This command comes from the firefox plugin 'cliget' that told me the curl command when downloading from. I removed all unnecessary headers for clarity
+				curl --header "$cookieHeader" "$i" -O -J -L
+			fi
+			cd "$topDir"
+			echo "$i downloaded"
+			echo "------------------------------------------"
 
-IFS=' ' read -ra line <<< `cat $1`  
+		else	# for the directory, create dir structure and cd into it. Next loop iteration, you'll encounter the URL and download the file over there
 
-for i in "${line[@]}"; do
-	if [[ $i =~ .*https* ]]; then  # for the URL, you should be cd'ed into the right place. Now download the file.
-   		echo "URL: $i"
-		if [[ -f "straightcam.zip" ]] || [[ -d "straightcam" ]]; then
-    			echo "File exists. Skipping..."
-		else
-			echo "File does not exist yet. Downloading..."
-			# This command comes from the firefox plugin 'cliget' that told me the curl command when downloading from. I removed all unnecessary headers for clarity
-			curl --header "$cookieHeader" "$i" -O -J -L
+			i=`echo "$i" | sed 's/\://g'` #remove colon from dirname
+			echo "Folder name: $i"
+
+			# make the directories and go in there to then be able to download the file
+			if [[ $i =~ .*Lipspkr* ]]; then  # if lipspeaker, go to the lipspeaker top-level folder, otherwise to the volunteer folder
+				mkdir -p "$topDir/lipspeakers/$i/Clips"
+				cd "$topDir/lipspeakers/$i/Clips"
+			else
+				mkdir -p "$topDir/volunteers/$i/Clips"
+				cd "$topDir/volunteers/$i/Clips"
+			fi
 		fi
-		cd "$topDir"
-		echo "$i downloaded"
-		echo "------------------------------------------"
-
-	else	# for the directory, create dir structure and cd into it. Next loop iteration, you'll encounter the URL and download the file over there
-
-		i=`echo "$i" | sed 's/\://g'` #remove colon from dirname
-		echo "Folder name: $i"
-			
-		# make the directories and go in there to then be able to download the file
-		if [[ $i =~ .*Lipspkr* ]]; then  # if lipspeaker, go to the lipspeaker top-level folder, otherwise to the volunteer folder
-			mkdir -p "$topDir/lipspeakers/$i/Clips"
-			cd "$topDir/lipspeakers/$i/Clips"
-		else
-			mkdir -p "$topDir/volunteers/$i/Clips"
-			cd "$topDir/volunteers/$i/Clips"
-		fi
-	fi
-done
-
+	done
+done < "$filename"
 curl --header  --header 'DNT: 1' 'https://sigmedia.tcd.ie/TCDTIMIT/filebrowser/download/588' -O -J -L
