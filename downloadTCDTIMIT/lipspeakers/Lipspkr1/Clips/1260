@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+  "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" version="XHTML+RDFa 1.0" dir="ltr"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/terms/"
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:og="http://ogp.me/ns#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xmlns:sioc="http://rdfs.org/sioc/ns#"
+  xmlns:sioct="http://rdfs.org/sioc/types#"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+
+<head profile="http://www.w3.org/1999/xhtml/vocab">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="shortcut icon" href="https://sigmedia.tcd.ie/TCDTIMIT/misc/favicon.ico" type="image/vnd.microsoft.icon" />
+<meta name="Generator" content="Drupal 7 (http://drupal.org)" />
+  <title>Access denied | sigmedia.tcd.ie</title>
+  <style type="text/css" media="all">
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/modules/system/system.base.css?qc4t36");
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/modules/system/system.menus.css?qc4t36");
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/modules/system/system.messages.css?qc4t36");
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/modules/system/system.theme.css?qc4t36");
+</style>
+<style type="text/css" media="all">
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/modules/comment/comment.css?qc4t36");
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/modules/field/theme/field.css?qc4t36");
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/sites/all/modules/filebrowser/css/filebrowser_style.css?qc4t36");
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/modules/node/node.css?qc4t36");
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/modules/search/search.css?qc4t36");
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/modules/user/user.css?qc4t36");
+</style>
+<style type="text/css" media="all">
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/themes/bartik/css/layout.css?qc4t36");
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/themes/bartik/css/style.css?qc4t36");
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/themes/bartik/css/colors.css?qc4t36");
+</style>
+<style type="text/css" media="print">
+@import url("https://sigmedia.tcd.ie/TCDTIMIT/themes/bartik/css/print.css?qc4t36");
+</style>
+
+<!--[if lte IE 7]>
+<link type="text/css" rel="stylesheet" href="https://sigmedia.tcd.ie/TCDTIMIT/themes/bartik/css/ie.css?qc4t36" media="all" />
+<![endif]-->
+
+<!--[if IE 6]>
+<link type="text/css" rel="stylesheet" href="https://sigmedia.tcd.ie/TCDTIMIT/themes/bartik/css/ie6.css?qc4t36" media="all" />
+<![endif]-->
+  <script type="text/javascript" src="https://sigmedia.tcd.ie/TCDTIMIT/misc/jquery.js?v=1.4.4"></script>
+<script type="text/javascript" src="https://sigmedia.tcd.ie/TCDTIMIT/misc/jquery-extend-3.4.0.js?v=1.4.4"></script>
+<script type="text/javascript" src="https://sigmedia.tcd.ie/TCDTIMIT/misc/jquery-html-prefilter-3.5.0-backport.js?v=1.4.4"></script>
+<script type="text/javascript" src="https://sigmedia.tcd.ie/TCDTIMIT/misc/jquery.once.js?v=1.2"></script>
+<script type="text/javascript" src="https://sigmedia.tcd.ie/TCDTIMIT/misc/drupal.js?qc4t36"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery.extend(Drupal.settings, {"basePath":"\/TCDTIMIT\/","pathPrefix":"","ajaxPageState":{"theme":"bartik","theme_token":"THqel9rsbxPxdXiICxXi2ffMnaQsrVGdbuWQKuFVaPM","js":{"misc\/jquery.js":1,"misc\/jquery-extend-3.4.0.js":1,"misc\/jquery-html-prefilter-3.5.0-backport.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1},"css":{"modules\/system\/system.base.css":1,"modules\/system\/system.menus.css":1,"modules\/system\/system.messages.css":1,"modules\/system\/system.theme.css":1,"modules\/comment\/comment.css":1,"modules\/field\/theme\/field.css":1,"sites\/all\/modules\/filebrowser\/css\/filebrowser_style.css":1,"modules\/node\/node.css":1,"modules\/search\/search.css":1,"modules\/user\/user.css":1,"themes\/bartik\/css\/layout.css":1,"themes\/bartik\/css\/style.css":1,"themes\/bartik\/css\/colors.css":1,"themes\/bartik\/css\/print.css":1,"themes\/bartik\/css\/ie.css":1,"themes\/bartik\/css\/ie6.css":1}},"urlIsAjaxTrusted":{"\/TCDTIMIT\/filebrowser\/download\/1260?destination=filebrowser\/download\/1260":true}});
+//--><!]]>
+</script>
+</head>
+<body class="html not-front not-logged-in one-sidebar sidebar-first page-filebrowser page-filebrowser-download page-filebrowser-download- page-filebrowser-download-1260" >
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible element-focusable">Skip to main content</a>
+  </div>
+    <div id="page-wrapper"><div id="page">
+
+  <div id="header" class="without-secondary-menu"><div class="section clearfix">
+
+          <a href="/TCDTIMIT/" title="Home" rel="home" id="logo">
+        <img src="https://sigmedia.tcd.ie/TCDTIMIT/themes/bartik/logo.png" alt="Home" />
+      </a>
+    
+          <div id="name-and-slogan">
+
+                              <div id="site-name">
+              <strong>
+                <a href="/TCDTIMIT/" title="Home" rel="home"><span>sigmedia.tcd.ie</span></a>
+              </strong>
+            </div>
+                  
+        
+      </div> <!-- /#name-and-slogan -->
+    
+    
+          <div id="main-menu" class="navigation">
+        <h2 class="element-invisible">Main menu</h2><ul id="main-menu-links" class="links clearfix"><li class="menu-218 first"><a href="/TCDTIMIT/">Home</a></li>
+<li class="menu-318 last"><a href="/TCDTIMIT/node/2">TCD-TIMIT Downloads</a></li>
+</ul>      </div> <!-- /#main-menu -->
+    
+    
+  </div></div> <!-- /.section, /#header -->
+
+  
+  
+  <div id="main-wrapper" class="clearfix"><div id="main" class="clearfix">
+
+    
+          <div id="sidebar-first" class="column sidebar"><div class="section">
+          <div class="region region-sidebar-first">
+    <div id="block-user-login" class="block block-user">
+
+    <h2>User login</h2>
+  
+  <div class="content">
+    <form action="/TCDTIMIT/filebrowser/download/1260?destination=filebrowser/download/1260" method="post" id="user-login-form" accept-charset="UTF-8"><div><div class="form-item form-type-textfield form-item-name">
+  <label for="edit-name">Username <span class="form-required" title="This field is required.">*</span></label>
+ <input type="text" id="edit-name" name="name" value="" size="15" maxlength="60" class="form-text required" />
+</div>
+<div class="form-item form-type-password form-item-pass">
+  <label for="edit-pass">Password <span class="form-required" title="This field is required.">*</span></label>
+ <input type="password" id="edit-pass" name="pass" size="15" maxlength="128" class="form-text required" />
+</div>
+<div class="item-list"><ul><li class="first"><a href="/TCDTIMIT/user/register" title="Create a new user account.">Create new account</a></li>
+<li class="last"><a href="/TCDTIMIT/user/password" title="Request new password via e-mail.">Request new password</a></li>
+</ul></div><input type="hidden" name="form_build_id" value="form-RzZUzZ1i-wj3kFlalsWW6sjCkMuhz85Y2oabsdqRqdE" />
+<input type="hidden" name="form_id" value="user_login_block" />
+<div class="form-actions form-wrapper" id="edit-actions"><input type="submit" id="edit-submit" name="op" value="Log in" class="form-submit" /></div></div></form>  </div>
+</div>
+  </div>
+      </div></div> <!-- /.section, /#sidebar-first -->
+    
+    <div id="content" class="column"><div class="section">
+            <a id="main-content"></a>
+                    <h1 class="title" id="page-title">
+          Access denied        </h1>
+                          <div class="tabs">
+                  </div>
+                          <div class="region region-content">
+    <div id="block-system-main" class="block block-system">
+
+    
+  <div class="content">
+    You are not authorized to access this page.  </div>
+</div>
+  </div>
+      
+    </div></div> <!-- /.section, /#content -->
+
+    
+  </div></div> <!-- /#main, /#main-wrapper -->
+
+  
+  <div id="footer-wrapper"><div class="section">
+
+    
+          <div id="footer" class="clearfix">
+          <div class="region region-footer">
+    <div id="block-system-powered-by" class="block block-system">
+
+    
+  <div class="content">
+    <span>Powered by <a href="https://www.drupal.org">Drupal</a></span>  </div>
+</div>
+  </div>
+      </div> <!-- /#footer -->
+    
+  </div></div> <!-- /.section, /#footer-wrapper -->
+
+</div></div> <!-- /#page, /#page-wrapper -->
+  </body>
+</html>
