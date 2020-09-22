@@ -6,7 +6,7 @@
 # 2. download the firefox plugin 'cliget'
 # 3. go to some file on the TCD- TIMIT downloads page, right click, and 'copy curl for link' in the cliget menu
 # 4. get the '--cookie' header, and replace the link in this script with it
-cookieHeader='has_js=1; SSESSa08f1a9d41786c65667603b759c65eb0=NW-fauMdWtIlRpD4IDzSARUNSv0LNRBi0IwJWCjT1Lo'
+cookieHeader='has_js=1; SSESSa08f1a9d41786c65667603b759c65eb0=MelCWnnAqDBE3xqyQeTAS31qUTKHwnvqDiFch3buaXM'
 
 topDir="$PWD"
 echo "Downloading the TCD- TIMIT database to $topDir"
@@ -36,7 +36,7 @@ while read -ra line
 			else
 				echo "File does not exist yet. Downloading..."
 				# This command comes from the firefox plugin 'cliget' that told me the curl command when downloading from. I removed all unnecessary headers for clarity
-				curl --header "$cookieHeader" "$i" -O -J -L
+				curl --cookie "$cookieHeader" "$i" -O -J -L
 			fi
 			cd "$topDir"
 			echo "$i downloaded"

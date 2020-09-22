@@ -61,9 +61,6 @@ Lipspkr3: https://sigmedia.tcd.ie/TCDTIMIT/filebrowser/download/1217
 57M: https://sigmedia.tcd.ie/TCDTIMIT/filebrowser/download/1477
 58F: https://sigmedia.tcd.ie/TCDTIMIT/filebrowser/download/1477
 59F: https://sigmedia.tcd.ie/TCDTIMIT/filebrowser/download/1225
-Lipspkr1: https://sigmedia.tcd.ie/TCDTIMIT/filebrowser/download/1260
-Lipspkr2: https://sigmedia.tcd.ie/TCDTIMIT/filebrowser/download/1215
-Lipspkr3: https://sigmedia.tcd.ie/TCDTIMIT/filebrowser/download/1217
 
 
 
